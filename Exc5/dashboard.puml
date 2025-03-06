@@ -1,0 +1,41 @@
+@startuml
+title "Кэширование Dashboard MES (write-thought)"
+
+actor b2c  as "B2C Клиент"
+actor b2b  as "B2B API Клиент"
+actor manager as "Продавец"
+actor oper as "Оператор"
+
+participant shop as "Shop"
+participant shop_api as "Shop API"
+database shop_db as "Shop DB"
+participant crm as "CRM"
+participant crm_api as "CRM API"
+queue q as "Очередь"
+participant mes as "MES"
+participant mes_api as "MES API"
+participant cache as "Кэш"
+database mes_db as "MES DB"
+
+b2c -> shop : Создание заказа
+shop -> shop_api
+b2b -> shop_api : Создание заказа
+shop_api -> shop_db
+manager -> crm : Создание заказа
+crm -> crm_api
+crm_api -> shop_db
+shop_db -> crm_api
+crm_api -> q
+q -> mes_api
+mes_api -> cache
+cache -> cache
+cache -> mes_db
+
+oper -> mes : Просмотр заказа
+mes -> mes_api
+mes_api -> cache
+cache -> mes_api
+mes_api -> mes
+oper <- mes
+
+@enduml
